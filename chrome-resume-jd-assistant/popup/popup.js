@@ -1,9 +1,9 @@
 // 更新API状态
 async function updateApiStatus() {
   const apiStatus = document.getElementById('apiStatus');
-  const { apiEndpoint, apiKey } = await chrome.storage.sync.get(['apiEndpoint', 'apiKey']);
+  const { apiEndpoint, apiKey, modelCode } = await chrome.storage.sync.get(['apiEndpoint', 'apiKey', 'modelCode']);
   
-  if (!apiEndpoint || !apiKey) {
+  if (!apiEndpoint || !apiKey || !modelCode) {
     apiStatus.textContent = '未配置';
     apiStatus.className = 'value error';
   } else {
@@ -67,7 +67,7 @@ async function initializePage() {
 
 // 监听存储变化，实时更新状态
 chrome.storage.onChanged.addListener((changes) => {
-  if (changes.apiEndpoint || changes.apiKey) {
+  if (changes.apiEndpoint || changes.apiKey || changes.modelCode) {
     updateApiStatus();
   }
   if (changes.resumes) {

@@ -12,6 +12,8 @@ function showStatus(elementId, message, isError = false) {
 document.getElementById('saveApi').addEventListener('click', async () => {
   const apiEndpoint = document.getElementById('apiEndpoint').value.trim();
   const apiKey = document.getElementById('apiKey').value.trim();
+  const modelCode = document.getElementById('modelCode').value.trim();
+  const promptTemplate = document.getElementById('promptTemplate').value.trim();
 
   if (!apiEndpoint || !apiKey) {
     showStatus('apiStatus', '请填写完整的API配置信息', true);
@@ -19,7 +21,7 @@ document.getElementById('saveApi').addEventListener('click', async () => {
   }
 
   try {
-    await chrome.storage.sync.set({ apiEndpoint, apiKey });
+    await chrome.storage.sync.set({ apiEndpoint, apiKey, modelCode, promptTemplate });
     showStatus('apiStatus', 'API配置保存成功');
   } catch (error) {
     showStatus('apiStatus', '保存失败：' + error.message, true);
@@ -171,11 +173,15 @@ async function initializePage() {
     const {
       apiEndpoint = '',
       apiKey = '',
+      modelCode = '',
+      promptTemplate = '我想要应聘以下职位：\n{jobDescription}\n\n我的简历信息如下：\n{resume}\n\n请根据职位描述和我的简历，生成一个合适的招呼语。要求：\n1. 有针对性地提到JD中的关键要求\n2. 突出我简历中相关的经验\n3. 语气要真诚友好\n4. 控制在150字以内',
       enableAllDomains = true
-    } = await chrome.storage.sync.get(['apiEndpoint', 'apiKey', 'enableAllDomains']);
+    } = await chrome.storage.sync.get(['apiEndpoint', 'apiKey', 'modelCode', 'promptTemplate', 'enableAllDomains']);
     
     document.getElementById('apiEndpoint').value = apiEndpoint;
     document.getElementById('apiKey').value = apiKey;
+    document.getElementById('modelCode').value = modelCode;
+    document.getElementById('promptTemplate').value = promptTemplate;
     document.getElementById('enableAllDomains').checked = enableAllDomains;
     document.getElementById('domainSettings').style.display = enableAllDomains ? 'none' : 'block';
     
