@@ -37,6 +37,23 @@ function createResumeElement(resume, index) {
   title.className = 'resume-title';
   title.textContent = resume.title;
   
+  const buttonsContainer = document.createElement('div');
+  buttonsContainer.className = 'resume-buttons';
+  
+  const editButton = document.createElement('button');
+  editButton.className = 'button';
+  editButton.textContent = '编辑';
+  editButton.onclick = () => {
+    // 填充表单以便编辑
+    document.getElementById('resumeTitle').value = resume.title;
+    document.getElementById('resumeContent').value = resume.content;
+    
+    // 更改添加按钮为保存按钮
+    const addButton = document.getElementById('addResume');
+    addButton.textContent = '保存修改';
+    addButton.dataset.editIndex = index;
+  };
+  
   const deleteButton = document.createElement('button');
   deleteButton.className = 'button delete';
   deleteButton.textContent = '删除';
@@ -52,8 +69,11 @@ function createResumeElement(resume, index) {
     }
   };
   
+  buttonsContainer.appendChild(editButton);
+  buttonsContainer.appendChild(deleteButton);
+  
   div.appendChild(title);
-  div.appendChild(deleteButton);
+  div.appendChild(buttonsContainer);
   return div;
 }
 
@@ -70,6 +90,8 @@ async function renderResumes() {
 document.getElementById('addResume').addEventListener('click', async () => {
   const title = document.getElementById('resumeTitle').value.trim();
   const content = document.getElementById('resumeContent').value.trim();
+  const addButton = document.getElementById('addResume');
+  const editIndex = addButton.dataset.editIndex;
 
   if (!title || !content) {
     showStatus('resumeStatus', '请填写完整的简历信息', true);
@@ -78,16 +100,27 @@ document.getElementById('addResume').addEventListener('click', async () => {
 
   try {
     const { resumes = [] } = await chrome.storage.sync.get(['resumes']);
-    resumes.push({ title, content });
+    
+    if (editIndex !== undefined) {
+      // 编辑现有简历
+      resumes[editIndex] = { title, content };
+      addButton.textContent = '添加简历';
+      delete addButton.dataset.editIndex;
+      showStatus('resumeStatus', '简历修改成功');
+    } else {
+      // 添加新简历
+      resumes.push({ title, content });
+      showStatus('resumeStatus', '简历添加成功');
+    }
+    
     await chrome.storage.sync.set({ resumes });
     
     document.getElementById('resumeTitle').value = '';
     document.getElementById('resumeContent').value = '';
     
     renderResumes();
-    showStatus('resumeStatus', '简历添加成功');
   } catch (error) {
-    showStatus('resumeStatus', '添加失败：' + error.message, true);
+    showStatus('resumeStatus', `${editIndex !== undefined ? '修改' : '添加'}失败：` + error.message, true);
   }
 });
 

@@ -3,7 +3,7 @@ const defaultConfig = {
   apiEndpoint: '',
   apiKey: '',
   modelCode: '',
-  promptTemplate: '我想要应聘以下职位：\n{jobDescription}\n\n我的简历信息如下：\n{resume}\n\n请根据职位描述和我的简历，生成一个合适的招呼语。要求：\n1. 有针对性地提到JD中的关键要求\n2. 突出我简历中相关的经验\n3. 语气要真诚友好\n4. 控制在150字以内',
+  promptTemplate: '我想要应聘以下职位：\n{{JD}}\n\n我的简历信息如下：\n{{RESUME}}\n\n请根据职位描述和我的简历，生成一个合适的招呼语。要求：\n1. 有针对性地提到JD中的关键要求\n2. 突出我简历中相关的经验\n3. 语气要真诚友好\n4. 控制在150字以内',
   resumes: [],
   enabledDomains: [],
   enableAllDomains: true
@@ -59,22 +59,26 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
           chrome.tabs.sendMessage(tab.id, {
             type: 'showError',
             message: '请先在插件选项中配置API信息和简历'
-          }, (response) => {
-            if (chrome.runtime.lastError) {
-              console.log('发送消息失败:', chrome.runtime.lastError.message);
-            }
+          }).catch(error => {
+            console.log('发送消息失败:', error);
           });
           return;
         }
 
         // 发送消息到content script开始生成
         try {
-          chrome.tabs.sendMessage(tab.id, {
-            type: 'startGeneration',
-            selectedText: info.selectionText
-          }, (response) => {
+          // 先检查标签页是否仍然存在
+          chrome.tabs.get(tab.id, (tabInfo) => {
             if (chrome.runtime.lastError) {
-              console.log('发送消息失败:', chrome.runtime.lastError.message);
+              console.log('标签页不存在:', chrome.runtime.lastError.message);
+              return;
+            }
+            
+            chrome.tabs.sendMessage(tab.id, {
+              type: 'startGeneration',
+              selectedText: info.selectionText
+            }).catch(error => {
+              console.log('发送消息失败:', error);
               // 尝试重新注入content script并重新发送消息
               chrome.scripting.executeScript({
                 target: { tabId: tab.id },
@@ -85,10 +89,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
                   chrome.tabs.sendMessage(tab.id, {
                     type: 'startGeneration',
                     selectedText: info.selectionText
-                  });
+                  }).catch(err => console.log('重新发送消息失败:', err));
                 }, 100);
-              });
-            }
+              }).catch(err => console.log('注入content script失败:', err));
+            });
           });
         } catch (error) {
           console.error('发送开始生成消息失败:', error);
@@ -97,8 +101,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         try {
           // 构建prompt
           const actualPrompt = (promptTemplate || defaultConfig.promptTemplate)
-            .replace('{jobDescription}', info.selectionText)
-            .replace('{resume}', resumes[0].content);
+            .replace(/{{JD}}/g, info.selectionText)
+            .replace(/{{RESUME}}/g, resumes[0].content);
 
           // 调用API
           const response = await fetch(apiEndpoint, {
@@ -154,10 +158,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
                         chrome.tabs.sendMessage(tab.id, {
                           type: 'showResult',
                           result: generatedText
-                        }, (response) => {
-                          if (chrome.runtime.lastError) {
-                            console.log('发送部分结果失败:', chrome.runtime.lastError.message);
-                          }
+                        }).catch(error => {
+                          console.log('发送部分结果失败:', error);
                         });
                       } catch (error) {
                         console.error('发送部分结果失败:', error);
@@ -170,15 +172,14 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
               }
             }
             
-            // 发送最终结果到content script
+            // 发送最终结果到content script，并标记为最终结果
             try {
               chrome.tabs.sendMessage(tab.id, {
                 type: 'showResult',
-                result: generatedText
-              }, (response) => {
-                if (chrome.runtime.lastError) {
-                  console.log('发送最终结果失败:', chrome.runtime.lastError.message);
-                }
+                result: generatedText,
+                isFinalResult: true  // 标记这是最终结果
+              }).catch(error => {
+                console.log('发送最终结果失败:', error);
               });
             } catch (error) {
               console.error('发送最终结果失败:', error);
@@ -191,10 +192,8 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
           chrome.tabs.sendMessage(tab.id, {
             type: 'showError',
             message: '生成失败：' + error.message
-          }, (response) => {
-            if (chrome.runtime.lastError) {
-              console.log('发送错误消息失败:', chrome.runtime.lastError.message);
-            }
+          }).catch(error => {
+            console.log('发送错误消息失败:', error);
           });
         }
       } else {
