@@ -156,7 +156,7 @@ function createModal(status = 'connecting') {
   
   // 根据状态设置文本
   if (status === 'connecting') {
-    statusIndicator.textContent = '连接中';
+    statusIndicator.textContent = '思考中';
   } else if (status === 'answering') {
     statusIndicator.textContent = '回答中';
   } else if (status === 'completed') {
@@ -185,7 +185,7 @@ function createModal(status = 'connecting') {
   return { overlay, content, statusIndicator };
 }
 
-// 显示连接中状态
+// 显示思考中状态
 function showLoading() {
   const { overlay, content } = createModal('connecting');
   content.className = 'ai-greeting-modal-loading';
@@ -202,8 +202,8 @@ function showResult(result, isFinalResult = false) {
     statusIndicator = overlay.querySelector('.ai-greeting-modal-status');
     content = overlay.querySelector('.ai-greeting-modal-content');
     
-    // 如果是第一次收到结果，状态从连接中变为回答中
-    if (statusIndicator.textContent === '连接中') {
+    // 如果是第一次收到结果，状态从思考中变为回答中
+    if (statusIndicator.textContent === '思考中') {
       statusIndicator.className = 'ai-greeting-modal-status answering';
       statusIndicator.textContent = '回答中';
     }
@@ -260,6 +260,12 @@ function showError(message) {
 
 // 监听来自background script的消息
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  // 响应ping请求，确认content script已加载
+  if (message.type === 'ping') {
+    sendResponse({ pong: true });
+    return true;
+  }
+
   // 移除所有现有的弹窗
   document.querySelectorAll('.ai-greeting-modal-overlay').forEach(el => el.remove());
 
