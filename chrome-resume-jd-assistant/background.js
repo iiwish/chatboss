@@ -30,19 +30,59 @@ const defaultConfig = {
   enableAllDomains: true
 };
 
+// 更新右键菜单状态
+async function updateContextMenu(url) {
+  // 移除现有的右键菜单
+  await chrome.contextMenus.removeAll();
+  
+  // 检查URL是否有效
+  if (!url || !(url.startsWith('http://') || url.startsWith('https://'))) {
+    return;
+  }
+
+  // 获取域名和配置
+  const domain = new URL(url).hostname;
+  const { enabledDomains = [], enableAllDomains = true } = await chrome.storage.sync.get([
+    'enabledDomains',
+    'enableAllDomains'
+  ]);
+
+  // 检查域名是否匹配配置的域名（包括子域名）
+  const isDomainAllowed = enableAllDomains || enabledDomains.some(configuredDomain => {
+    // 如果当前域名以配置的域名结尾，并且前面是域名分隔符（.）或者是开头
+    return domain === configuredDomain || 
+           domain.endsWith('.' + configuredDomain);
+  });
+
+  // 只在允许的域名上创建右键菜单
+  if (isDomainAllowed) {
+    chrome.contextMenus.create({
+      id: 'generateGreeting',
+      title: 'AI生成招呼语',
+      contexts: ['selection']
+    });
+  }
+}
+
 // 初始化配置
 chrome.runtime.onInstalled.addListener(async () => {
   const config = await chrome.storage.sync.get(defaultConfig);
   if (!config) {
     await chrome.storage.sync.set(defaultConfig);
   }
-  
-  // 创建右键菜单
-  chrome.contextMenus.create({
-    id: 'generateGreeting',
-    title: 'AI生成招呼语',
-    contexts: ['selection']
-  });
+});
+
+// 监听标签页URL变化
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.url) {
+    updateContextMenu(changeInfo.url);
+  }
+});
+
+// 监听标签页激活
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
+  const tab = await chrome.tabs.get(activeInfo.tabId);
+  updateContextMenu(tab.url);
 });
 
 // 处理右键菜单点击
@@ -136,7 +176,13 @@ function handleGreetingGeneration(info, tab) {
     const url = new URL(tab.url);
     const domain = url.hostname;
     
-    if (config.enableAllDomains || config.enabledDomains.includes(domain)) {
+    // 检查域名是否匹配配置的域名（包括子域名）
+    const isDomainAllowed = config.enableAllDomains || config.enabledDomains.some(configuredDomain => {
+      return domain === configuredDomain || 
+             domain.endsWith('.' + configuredDomain);
+    });
+    
+    if (isDomainAllowed) {
       // 获取配置和简历
       const { apiEndpoint, apiKey, modelCode, promptTemplate, resumes } = await chrome.storage.sync.get([
         'apiEndpoint',
