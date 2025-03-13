@@ -168,6 +168,9 @@ function createModal(status = 'connecting') {
   closeButton.className = 'ai-greeting-modal-close';
   closeButton.textContent = '×';
   closeButton.onclick = () => {
+    // 向background发送取消请求的消息
+    chrome.runtime.sendMessage({ type: 'cancelGeneration' });
+    // 移除弹窗
     overlay.remove();
   };
 

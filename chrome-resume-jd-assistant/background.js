@@ -1,3 +1,6 @@
+// 存储每个tab的abort controller，用于取消请求
+const abortControllers = new Map();
+
 // 存储默认配置
 const defaultConfig = {
   apiEndpoint: '',
@@ -96,8 +99,20 @@ function injectContentScript(tabId) {
   });
 }
 
+// 取消指定tab的请求
+function cancelRequest(tabId) {
+  if (abortControllers.has(tabId)) {
+    const controller = abortControllers.get(tabId);
+    controller.abort();
+    abortControllers.delete(tabId);
+    console.log(`已取消Tab ${tabId}的请求`);
+  }
+}
+
 // 处理招呼语生成的主要逻辑
 function handleGreetingGeneration(info, tab) {
+  // 如果已有请求正在进行，先取消它
+  cancelRequest(tab.id);
   // 检查是否在允许的域名中
   chrome.storage.sync.get(['enabledDomains', 'enableAllDomains'], async (config) => {
     const url = new URL(tab.url);
@@ -128,13 +143,18 @@ function handleGreetingGeneration(info, tab) {
       });
 
       try {
+        // 创建新的AbortController并存储
+        const controller = new AbortController();
+        abortControllers.set(tab.id, controller);
+        
         // 构建prompt
         const actualPrompt = (promptTemplate || defaultConfig.promptTemplate)
           .replace(/{{JD}}/g, info.selectionText)
           .replace(/{{RESUME}}/g, resumes[0].content);
 
-        // 调用API
+        // 调用API，使用AbortController的signal
         const response = await fetch(apiEndpoint, {
+          signal: controller.signal,
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -167,6 +187,12 @@ function handleGreetingGeneration(info, tab) {
         
         try {
           while (true) {
+            // 检查是否已被取消
+            if (!abortControllers.has(tab.id)) {
+              console.log('请求已被取消，停止处理流式响应');
+              break;
+            }
+            
             const { done, value } = await reader.read();
             if (done) break;
             
@@ -181,6 +207,12 @@ function handleGreetingGeneration(info, tab) {
                   const data = JSON.parse(line.substring(6));
                   if (data.choices && data.choices[0].delta && data.choices[0].delta.content) {
                     generatedText += data.choices[0].delta.content;
+                    
+                    // 检查请求是否已被取消
+                    if (!abortControllers.has(tab.id)) {
+                      console.log('请求已被取消，停止发送结果');
+                      break;
+                    }
                     
                     // 发送部分结果到content script
                     try {
@@ -201,27 +233,43 @@ function handleGreetingGeneration(info, tab) {
             }
           }
           
-          // 发送最终结果到content script，并标记为最终结果
-          try {
-            chrome.tabs.sendMessage(tab.id, {
-              type: 'showResult',
-              result: generatedText,
-              isFinalResult: true  // 标记这是最终结果
-            }).catch(error => {
-              console.log('发送最终结果失败:', error);
-            });
-          } catch (error) {
-            console.error('发送最终结果失败:', error);
+          // 只有在请求未被取消的情况下才发送最终结果
+          if (abortControllers.has(tab.id)) {
+            // 发送最终结果到content script，并标记为最终结果
+            try {
+              chrome.tabs.sendMessage(tab.id, {
+                type: 'showResult',
+                result: generatedText,
+                isFinalResult: true  // 标记这是最终结果
+              }).catch(error => {
+                console.log('发送最终结果失败:', error);
+              });
+              
+              // 请求完成后清理AbortController
+              abortControllers.delete(tab.id);
+            } catch (error) {
+              console.error('发送最终结果失败:', error);
+            }
           }
         } catch (error) {
           console.error('处理流式响应失败:', error);
           throw error;
         }
       } catch (error) {
-        sendMessageToTab(tab.id, {
-          type: 'showError',
-          message: '生成失败：' + error.message
-        });
+        // 检查是否是AbortError（请求被取消）
+        if (error.name === 'AbortError') {
+          console.log('请求被用户取消');
+        } else {
+          // 只有在请求未被取消的情况下才发送错误消息
+          if (abortControllers.has(tab.id)) {
+            sendMessageToTab(tab.id, {
+              type: 'showError',
+              message: '生成失败：' + error.message
+            });
+            // 清理AbortController
+            abortControllers.delete(tab.id);
+          }
+        }
       }
     } else {
       sendMessageToTab(tab.id, {
@@ -251,6 +299,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     chrome.storage.sync.get(['resumes'], (result) => {
       sendResponse({ resumes: result.resumes || [] });
     });
+    return true;
+  } else if (message.type === 'cancelGeneration') {
+    // 处理取消生成请求
+    if (sender.tab && sender.tab.id) {
+      cancelRequest(sender.tab.id);
+      sendResponse({ success: true });
+    }
     return true;
   }
 });
