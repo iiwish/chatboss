@@ -3,32 +3,26 @@ const abortControllers = new Map();
 
 // 存储默认配置
 const defaultConfig = {
-  apiEndpoint: '',
-  apiKey: '',
-  modelCode: '',
-  promptTemplate: `你是一位专业的求职顾问，擅长帮助求职者撰写个性化的招呼语。
-
-【招聘信息】:
-{{JD}}
-
-【我的简历信息】:
-{{RESUME}}
-
-请根据上述招聘信息和我的简历，帮我生成一封专业、个性化的招呼语。要求:
-
-1. 开头简短自我介绍，点明应聘意向
-2. 中间部分针对JD中的关键技能要求，从我的简历中提取最匹配的1-2个经验亮点进行展示
-3. 结尾表达对职位的热情和期待进一步交流的意愿
-4. 保持语气真诚友好、专业得体，避免过度吹嘘
-5. 总字数控制在100-150字之间
-6. 确保内容高度针对性，不要泛泛而谈
-7. 如果JD和简历匹配度不高，找出可迁移的能力或经验进行强调
-
-请直接给出招呼语文本，不要包含解释。`,
+  apiConfigs: [],
+  currentApiConfigIndex: 0,
   resumes: [],
   enabledDomains: [],
   enableAllDomains: true
 };
+
+// 获取当前使用的API配置
+async function getCurrentApiConfig() {
+  const { apiConfigs = [], currentApiConfigIndex = 0 } = await chrome.storage.sync.get([
+    'apiConfigs',
+    'currentApiConfigIndex'
+  ]);
+
+  if (!apiConfigs.length) {
+    throw new Error('请先添加API配置');
+  }
+
+  return apiConfigs[currentApiConfigIndex];
+}
 
 // 更新右键菜单状态
 async function updateContextMenu(url) {
@@ -183,19 +177,24 @@ function handleGreetingGeneration(info, tab) {
     });
     
     if (isDomainAllowed) {
-      // 获取配置和简历
-      const { apiEndpoint, apiKey, modelCode, promptTemplate, resumes } = await chrome.storage.sync.get([
-        'apiEndpoint',
-        'apiKey',
-        'modelCode',
-        'promptTemplate',
-        'resumes'
-      ]);
-
-      if (!apiEndpoint || !apiKey || resumes.length === 0) {
+      // 获取当前API配置和简历
+      const { resumes } = await chrome.storage.sync.get(['resumes']);
+      let currentConfig;
+      
+      try {
+        currentConfig = await getCurrentApiConfig();
+      } catch (error) {
         sendMessageToTab(tab.id, {
           type: 'showError',
-          message: '请先在插件选项中配置API信息和简历'
+          message: error.message
+        });
+        return;
+      }
+
+      if (resumes.length === 0) {
+        sendMessageToTab(tab.id, {
+          type: 'showError',
+          message: '请先在插件选项中添加简历'
         });
         return;
       }
@@ -216,22 +215,22 @@ function handleGreetingGeneration(info, tab) {
           `【${resume.title}】\n${resume.content}`).join('\n\n');
         
         // 处理两种可能的占位符格式
-        const actualPrompt = (promptTemplate || defaultConfig.promptTemplate)
+        const actualPrompt = (currentConfig.promptTemplate || defaultConfig.promptTemplate)
           .replace(/{{JD}}/g, info.selectionText)
           .replace(/{{RESUME}}/g, allResumes)
           .replace(/{jobDescription}/g, info.selectionText)
           .replace(/{resume}/g, allResumes);
 
         // 调用API，使用AbortController的signal
-        const response = await fetch(apiEndpoint, {
+        const response = await fetch(currentConfig.apiEndpoint, {
           signal: controller.signal,
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
+            'Authorization': `Bearer ${currentConfig.apiKey}`
           },
           body: JSON.stringify({
-            model: modelCode,
+            model: currentConfig.modelCode,
             messages: [
               {
                 role: "system",
