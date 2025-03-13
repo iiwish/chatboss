@@ -2,9 +2,11 @@
 function showStatus(elementId, message, isError = false) {
   const status = document.getElementById(elementId);
   status.textContent = message;
-  status.className = `status ${isError ? 'error' : 'success'}`;
+  status.className = `alert ${isError ? 'alert-danger' : 'alert-success'}`;
+  status.style.display = 'block';
+  
   setTimeout(() => {
-    status.className = 'status';
+    status.style.display = 'none';
   }, 3000);
 }
 
@@ -36,6 +38,15 @@ async function renderApiConfigs() {
   const { apiConfigs = [], currentApiConfigIndex = 0 } = await chrome.storage.sync.get(['apiConfigs', 'currentApiConfigIndex']);
   
   configList.innerHTML = '';
+  
+  if (apiConfigs.length === 0) {
+    const emptyMessage = document.createElement('div');
+    emptyMessage.className = 'help-tip';
+    emptyMessage.innerHTML = '您还没有添加任何API配置。点击下方的"添加新配置"按钮开始设置。';
+    configList.appendChild(emptyMessage);
+    return;
+  }
+  
   apiConfigs.forEach((config, index) => {
     const div = document.createElement('div');
     div.className = `api-config-item ${index === currentApiConfigIndex ? 'current-api' : ''}`;
@@ -59,7 +70,7 @@ async function renderApiConfigs() {
     
     // 使用此配置按钮
     const useButton = document.createElement('button');
-    useButton.className = 'button' + (index === currentApiConfigIndex ? ' secondary' : ' primary');
+    useButton.className = 'btn' + (index === currentApiConfigIndex ? ' btn-secondary' : ' btn-success btn-sm');
     useButton.textContent = index === currentApiConfigIndex ? '当前使用中' : '使用此配置';
     useButton.disabled = index === currentApiConfigIndex;
     useButton.onclick = async () => {
@@ -70,7 +81,7 @@ async function renderApiConfigs() {
     
     // 编辑按钮
     const editButton = document.createElement('button');
-    editButton.className = 'button';
+    editButton.className = 'btn btn-primary btn-sm';
     editButton.textContent = '编辑';
     editButton.onclick = () => {
       currentEditIndex = index;
@@ -79,7 +90,7 @@ async function renderApiConfigs() {
     
     // 删除按钮
     const deleteButton = document.createElement('button');
-    deleteButton.className = 'button delete';
+    deleteButton.className = 'btn btn-danger btn-sm';
     deleteButton.textContent = '删除';
     deleteButton.onclick = async () => {
       if (confirm('确定要删除这个API配置吗？')) {
@@ -200,11 +211,24 @@ function createResumeElement(resume, index) {
   title.className = 'resume-title';
   title.textContent = resume.title;
   
+  // 添加简历内容预览
+  const preview = document.createElement('div');
+  preview.className = 'text-muted';
+  preview.style.fontSize = '0.8rem';
+  preview.style.marginTop = '4px';
+  preview.textContent = resume.content.length > 100 
+    ? resume.content.substring(0, 100) + '...' 
+    : resume.content;
+  
+  const infoContainer = document.createElement('div');
+  infoContainer.appendChild(title);
+  infoContainer.appendChild(preview);
+  
   const buttonsContainer = document.createElement('div');
   buttonsContainer.className = 'resume-buttons';
   
   const editButton = document.createElement('button');
-  editButton.className = 'button';
+  editButton.className = 'btn btn-primary btn-sm';
   editButton.textContent = '编辑';
   editButton.onclick = () => {
     // 填充表单以便编辑
@@ -215,27 +239,32 @@ function createResumeElement(resume, index) {
     const addButton = document.getElementById('addResume');
     addButton.textContent = '保存修改';
     addButton.dataset.editIndex = index;
+    
+    // 滚动到表单位置
+    document.getElementById('resumeTitle').scrollIntoView({ behavior: 'smooth' });
   };
   
   const deleteButton = document.createElement('button');
-  deleteButton.className = 'button delete';
+  deleteButton.className = 'btn btn-danger btn-sm';
   deleteButton.textContent = '删除';
   deleteButton.onclick = async () => {
-    try {
-      const { resumes } = await chrome.storage.sync.get(['resumes']);
-      resumes.splice(index, 1);
-      await chrome.storage.sync.set({ resumes });
-      renderResumes();
-      showStatus('resumeStatus', '简历删除成功');
-    } catch (error) {
-      showStatus('resumeStatus', '删除失败：' + error.message, true);
+    if (confirm('确定要删除这份简历吗？')) {
+      try {
+        const { resumes } = await chrome.storage.sync.get(['resumes']);
+        resumes.splice(index, 1);
+        await chrome.storage.sync.set({ resumes });
+        renderResumes();
+        showStatus('resumeStatus', '简历删除成功');
+      } catch (error) {
+        showStatus('resumeStatus', '删除失败：' + error.message, true);
+      }
     }
   };
   
   buttonsContainer.appendChild(editButton);
   buttonsContainer.appendChild(deleteButton);
   
-  div.appendChild(title);
+  div.appendChild(infoContainer);
   div.appendChild(buttonsContainer);
   return div;
 }
@@ -245,6 +274,15 @@ async function renderResumes() {
   const { resumes = [] } = await chrome.storage.sync.get(['resumes']);
   
   resumeList.innerHTML = '';
+  
+  if (resumes.length === 0) {
+    const emptyMessage = document.createElement('div');
+    emptyMessage.className = 'help-tip';
+    emptyMessage.innerHTML = '您还没有添加任何简历。添加至少一份简历才能使用招呼语生成功能。';
+    resumeList.appendChild(emptyMessage);
+    return;
+  }
+  
   resumes.forEach((resume, index) => {
     resumeList.appendChild(createResumeElement(resume, index));
   });
@@ -297,7 +335,7 @@ function createDomainElement(domain, index) {
   text.style.flexGrow = '1';
   
   const deleteButton = document.createElement('button');
-  deleteButton.className = 'button delete';
+  deleteButton.className = 'btn btn-danger btn-sm';
   deleteButton.textContent = '删除';
   deleteButton.onclick = async () => {
     try {
@@ -318,9 +356,27 @@ function createDomainElement(domain, index) {
 
 async function renderDomains() {
   const domainList = document.getElementById('domainList');
-  const { enabledDomains = [] } = await chrome.storage.sync.get(['enabledDomains']);
+  const { enabledDomains = [], enableAllDomains = true } = await chrome.storage.sync.get(['enabledDomains', 'enableAllDomains']);
   
   domainList.innerHTML = '';
+  
+  if (enableAllDomains) {
+    // 如果启用了所有域名，显示提示信息
+    const allEnabledMessage = document.createElement('div');
+    allEnabledMessage.className = 'help-tip';
+    allEnabledMessage.innerHTML = '当前已启用所有网站。如需限制特定网站，请取消勾选"在所有网站上启用"选项。';
+    domainList.appendChild(allEnabledMessage);
+    return;
+  }
+  
+  if (enabledDomains.length === 0) {
+    const emptyMessage = document.createElement('div');
+    emptyMessage.className = 'help-tip';
+    emptyMessage.innerHTML = '您还没有添加任何域名。添加至少一个域名才能在特定网站上使用此功能。';
+    domainList.appendChild(emptyMessage);
+    return;
+  }
+  
   enabledDomains.forEach((domain, index) => {
     domainList.appendChild(createDomainElement(domain, index));
   });

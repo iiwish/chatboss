@@ -3,143 +3,93 @@
 <head>
   <meta charset="UTF-8">
   <title>AI招呼语生成器 - 设置</title>
+  <link rel="stylesheet" href="../css/styles.css">
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      padding: 20px;
+      padding: var(--spacing-lg);
       max-width: 800px;
       margin: 0 auto;
-      color: #333;
+      color: var(--text-primary);
+      background-color: var(--bg-tertiary);
+    }
+
+    .page-header {
+      margin-bottom: var(--spacing-lg);
+      text-align: center;
+    }
+
+    .page-title {
+      font-size: 1.8rem;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .page-subtitle {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      font-weight: normal;
     }
 
     .section {
-      margin-bottom: 30px;
-      padding: 20px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: var(--spacing-lg);
+      padding: var(--spacing-lg);
+      background: var(--bg-color);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .section-icon {
+      width: 28px;
+      height: 28px;
+      background-color: var(--primary-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      margin-right: var(--spacing-sm);
     }
 
     h2 {
-      margin-top: 0;
-      color: #2c3e50;
-      font-size: 1.5em;
+      margin: 0;
+      color: var(--text-primary);
+      font-size: 1.3rem;
     }
 
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 500;
-    }
-
-    input[type="text"],
-    input[type="url"],
-    textarea {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-
-    textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    .resume-list {
-      margin-top: 15px;
-    }
-
-    .resume-item {
-      padding: 10px;
-      background: #f8f9fa;
-      border-radius: 4px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .resume-title {
-      font-weight: 500;
-    }
-
-    .button {
-      background-color: #3498db;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background-color 0.2s;
-    }
-
-    .button:hover {
-      background-color: #2980b9;
-    }
-
-    .button.delete {
-      background-color: #e74c3c;
-    }
-
-    .button.delete:hover {
-      background-color: #c0392b;
-    }
-
-    .status {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 4px;
-      display: none;
-    }
-
-    .status.success {
-      background-color: #d4edda;
-      color: #155724;
-      display: block;
-    }
-
-    .status.error {
-      background-color: #f8d7da;
-      color: #721c24;
-      display: block;
-    }
-
-    .domain-list {
-      margin-top: 15px;
-    }
-
-    .domain-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .domain-input {
-      flex-grow: 1;
+    .section-description {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: var(--spacing-md);
+      padding-bottom: var(--spacing-sm);
+      border-bottom: 1px solid var(--border-color);
     }
 
     /* API配置列表样式 */
     .api-config-list {
-      margin-bottom: 20px;
+      margin-bottom: var(--spacing-md);
     }
 
     .api-config-item {
-      background: #f8f9fa;
-      border-radius: 4px;
-      padding: 15px;
-      margin-bottom: 10px;
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-md);
+      margin-bottom: var(--spacing-sm);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .api-config-item:hover {
+      box-shadow: var(--shadow-sm);
     }
 
     .api-config-info {
@@ -147,125 +97,254 @@
     }
 
     .api-config-name {
-      font-weight: 500;
-      font-size: 16px;
-      margin-bottom: 5px;
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 4px;
+      color: var(--text-primary);
     }
 
     .api-config-url {
-      color: #666;
-      font-size: 14px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
     }
 
     .api-config-actions {
       display: flex;
-      gap: 10px;
-    }
-
-    .button-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    .button.primary {
-      background-color: #2ecc71;
-    }
-
-    .button.primary:hover {
-      background-color: #27ae60;
-    }
-
-    .button.secondary {
-      background-color: #95a5a6;
-    }
-
-    .button.secondary:hover {
-      background-color: #7f8c8d;
+      gap: var(--spacing-sm);
     }
 
     .api-config-form {
-      background: #f8f9fa;
-      border-radius: 4px;
-      padding: 20px;
-      margin-bottom: 20px;
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
+      border: 1px solid var(--border-color);
     }
 
     .current-api {
-      background-color: #e8f5e9;
-      border-left: 4px solid #2ecc71;
+      background-color: rgba(40, 167, 69, 0.1);
+      border-left: 4px solid var(--success-color);
+    }
+
+    /* 简历列表样式 */
+    .resume-list {
+      margin-top: var(--spacing-md);
+    }
+
+    .resume-item {
+      padding: var(--spacing-md);
+      background: var(--bg-secondary);
+      border-radius: var(--border-radius-md);
+      margin-bottom: var(--spacing-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .resume-item:hover {
+      box-shadow: var(--shadow-sm);
+    }
+
+    .resume-title {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .resume-buttons {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+
+    /* 域名列表样式 */
+    .domain-list {
+      margin-top: var(--spacing-md);
+    }
+
+    .domain-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-sm);
+      padding: var(--spacing-sm) 0;
+    }
+
+    .domain-input {
+      flex-grow: 1;
+    }
+
+    /* 表单元素自定义样式 */
+    textarea.form-control {
+      min-height: 120px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    /* 帮助提示 */
+    .help-tip {
+      margin-top: var(--spacing-sm);
+      padding: var(--spacing-sm);
+      background-color: var(--bg-tertiary);
+      border-radius: var(--border-radius-sm);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      border-left: 3px solid var(--info-color);
+    }
+
+    /* 步骤指引 */
+    .setup-guide {
+      margin-bottom: var(--spacing-lg);
     }
   </style>
 </head>
 <body>
+  <div class="page-header">
+    <h1 class="page-title">AI招呼语生成器</h1>
+    <p class="page-subtitle">配置您的个人设置，开始生成专业的招呼语</p>
+  </div>
+
+  <div class="setup-guide">
+    <div class="steps">
+      <div class="step">
+        <div class="step-title">配置API</div>
+        <div class="step-content">添加您的API密钥和接口地址，支持OpenAI等多种API服务</div>
+      </div>
+      <div class="step">
+        <div class="step-title">添加简历</div>
+        <div class="step-content">添加一份或多份简历，用于生成针对不同职位的招呼语</div>
+      </div>
+      <div class="step">
+        <div class="step-title">设置网站</div>
+        <div class="step-content">选择在哪些招聘网站上启用此功能</div>
+      </div>
+    </div>
+  </div>
+
   <div class="section">
-    <h2>API配置</h2>
+    <div class="section-header">
+      <div class="section-icon">🔑</div>
+      <h2>API配置</h2>
+    </div>
+    <div class="section-description">
+      配置您的API接口信息，支持OpenAI、Azure OpenAI等多种服务。您可以添加多个配置并随时切换。
+    </div>
+    
     <div id="apiConfigList" class="api-config-list">
       <!-- API配置列表将通过JavaScript动态生成 -->
     </div>
+    
     <div class="api-config-form" style="display: none;">
       <div class="form-group">
-        <label for="configName">配置名称</label>
-        <input type="text" id="configName" placeholder="例如：OpenAI GPT-3.5">
+        <label class="form-label" for="configName">配置名称</label>
+        <input type="text" id="configName" class="form-control" placeholder="例如：OpenAI GPT-3.5">
+        <small class="form-text">为您的API配置起一个易于识别的名称</small>
       </div>
       <div class="form-group">
-        <label for="apiEndpoint">API接口地址</label>
-        <input type="url" id="apiEndpoint" placeholder="例如：https://api.openai.com/v1/chat/completions">
+        <label class="form-label" for="apiEndpoint">API接口地址</label>
+        <input type="url" id="apiEndpoint" class="form-control" placeholder="例如：https://api.openai.com/v1/chat/completions">
+        <small class="form-text">输入完整的API接口地址，不包含chat/completions部分</small>
       </div>
       <div class="form-group">
-        <label for="apiKey">API密钥</label>
-        <input type="text" id="apiKey" placeholder="输入您的API密钥">
+        <label class="form-label" for="apiKey">API密钥</label>
+        <input type="text" id="apiKey" class="form-control" placeholder="输入您的API密钥">
+        <small class="form-text">您的API访问密钥，请妥善保管</small>
       </div>
       <div class="form-group">
-        <label for="modelCode">模型代码</label>
-        <input type="text" id="modelCode" placeholder="例如：gpt-3.5-turbo">
+        <label class="form-label" for="modelCode">模型代码</label>
+        <input type="text" id="modelCode" class="form-control" placeholder="例如：gpt-3.5-turbo">
+        <small class="form-text">指定要使用的AI模型代码</small>
       </div>
       <div class="form-group">
-        <label for="promptTemplate">提示模板</label>
-        <textarea id="promptTemplate" placeholder="自定义提示模板，使用{{JD}}表示职位描述，{{RESUME}}表示简历内容"></textarea>
+        <label class="form-label" for="promptTemplate">提示模板</label>
+        <textarea id="promptTemplate" class="form-control" placeholder="自定义提示模板，使用{{JD}}表示职位描述，{{RESUME}}表示简历内容"></textarea>
+        <small class="form-text">自定义提示词模板，使用{{JD}}和{{RESUME}}作为占位符</small>
       </div>
-      <div class="button-group">
-        <button id="saveApi" class="button">保存配置</button>
-        <button id="cancelEdit" class="button secondary">取消</button>
+      <div class="d-flex gap-sm">
+        <button id="saveApi" class="btn btn-primary">保存配置</button>
+        <button id="cancelEdit" class="btn btn-secondary">取消</button>
       </div>
     </div>
-    <button id="addNewConfig" class="button primary">添加新配置</button>
-    <div id="apiStatus" class="status"></div>
+    
+    <div class="mt-md">
+      <button id="addNewConfig" class="btn btn-success">添加新配置</button>
+    </div>
+    
+    <div id="apiStatus" class="alert" style="display: none;"></div>
+    
+    <div class="help-tip">
+      <strong>提示：</strong> 您需要有一个有效的API密钥才能使用此功能。如果您没有API密钥，可以在OpenAI官网申请，或使用其他兼容的API服务。
+    </div>
   </div>
 
   <div class="section">
-    <h2>简历管理</h2>
+    <div class="section-header">
+      <div class="section-icon">📄</div>
+      <h2>简历管理</h2>
+    </div>
+    <div class="section-description">
+      添加您的简历信息，可以添加多份针对不同职位的简历版本。系统会根据招聘JD自动选择最合适的简历内容。
+    </div>
+    
     <div class="form-group">
-      <label for="resumeTitle">简历标题</label>
-      <input type="text" id="resumeTitle" placeholder="例如：产品经理简历">
+      <label class="form-label" for="resumeTitle">简历标题</label>
+      <input type="text" id="resumeTitle" class="form-control" placeholder="例如：产品经理简历">
+      <small class="form-text">为您的简历起一个描述性的标题，方便区分不同版本</small>
     </div>
     <div class="form-group">
-      <label for="resumeContent">简历内容</label>
-      <textarea id="resumeContent" placeholder="粘贴您的简历内容"></textarea>
+      <label class="form-label" for="resumeContent">简历内容</label>
+      <textarea id="resumeContent" class="form-control" placeholder="粘贴您的简历内容"></textarea>
+      <small class="form-text">粘贴您的简历文本内容，建议包含个人技能、工作经历和教育背景等关键信息</small>
     </div>
-    <button id="addResume" class="button">添加简历</button>
-    <div id="resumeList" class="resume-list"></div>
-    <div id="resumeStatus" class="status"></div>
+    
+    <button id="addResume" class="btn btn-primary">添加简历</button>
+    
+    <div id="resumeList" class="resume-list">
+      <!-- 简历列表将通过JavaScript动态生成 -->
+    </div>
+    
+    <div id="resumeStatus" class="alert" style="display: none;"></div>
+    
+    <div class="help-tip">
+      <strong>提示：</strong> 添加多份针对不同职位的简历可以提高生成招呼语的针对性。例如，可以分别添加技术岗、产品岗、设计岗等不同版本的简历。
+    </div>
   </div>
 
   <div class="section">
-    <h2>网站设置</h2>
+    <div class="section-header">
+      <div class="section-icon">🌐</div>
+      <h2>网站设置</h2>
+    </div>
+    <div class="section-description">
+      设置在哪些招聘网站上启用AI招呼语生成功能。您可以选择在所有网站上启用，或仅在特定网站上启用。
+    </div>
+    
     <div class="form-group">
-      <label>
-        <input type="checkbox" id="enableAllDomains"> 在所有网站上启用
+      <label class="d-flex align-items-center">
+        <input type="checkbox" id="enableAllDomains"> 
+        <span class="ml-2">在所有网站上启用</span>
       </label>
+      <small class="form-text">选中此项将在所有网站上启用右键菜单功能</small>
     </div>
+    
     <div id="domainSettings">
       <div class="form-group">
-        <label for="domain">添加特定网站域名</label>
+        <label class="form-label" for="domain">添加特定网站域名</label>
         <div class="domain-item">
-          <input type="text" id="domain" class="domain-input" placeholder="例如：www.linkedin.com">
-          <button id="addDomain" class="button">添加</button>
+          <input type="text" id="domain" class="form-control domain-input" placeholder="例如：www.linkedin.com">
+          <button id="addDomain" class="btn btn-primary">添加</button>
         </div>
+        <small class="form-text">输入要启用的网站域名，不需要包含http://或https://</small>
       </div>
-      <div id="domainList" class="domain-list"></div>
+      
+      <div id="domainList" class="domain-list">
+        <!-- 域名列表将通过JavaScript动态生成 -->
+      </div>
     </div>
-    <div id="domainStatus" class="status"></div>
+    
+    <div id="domainStatus" class="alert" style="display: none;"></div>
+    
+    <div class="help-tip">
+      <strong>提示：</strong> 为了保护您的隐私和提高性能，建议只在您常用的招聘网站上启用此功能。常见的招聘网站包括LinkedIn、Indeed、智联招聘、BOSS直聘等。
+    </div>
   </div>
 
   <script src="options.js"></script>

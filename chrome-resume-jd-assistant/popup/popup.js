@@ -36,14 +36,13 @@ async function updateApiStatus() {
   if (apiConfigs.length === 0) {
     apiStatus.textContent = '未配置';
     apiStatus.className = 'value error';
+    apiStatus.innerHTML = '<span class="badge badge-danger">未配置</span>';
   } else {
     const currentConfig = apiConfigs[currentApiConfigIndex];
     if (currentConfig && currentConfig.apiEndpoint && currentConfig.apiKey) {
-      apiStatus.textContent = '已配置';
-      apiStatus.className = 'value success';
+      apiStatus.innerHTML = '<span class="badge badge-success">已配置</span>';
     } else {
-      apiStatus.textContent = '配置不完整';
-      apiStatus.className = 'value error';
+      apiStatus.innerHTML = '<span class="badge badge-danger">配置不完整</span>';
     }
   }
 }
@@ -63,11 +62,9 @@ async function updateResumeStatus() {
   const { resumes = [] } = await chrome.storage.sync.get(['resumes']);
   
   if (resumes.length === 0) {
-    resumeStatus.textContent = '未添加';
-    resumeStatus.className = 'value error';
+    resumeStatus.innerHTML = '<span class="badge badge-danger">未添加</span>';
   } else {
-    resumeStatus.textContent = `已添加 ${resumes.length} 份`;
-    resumeStatus.className = 'value success';
+    resumeStatus.innerHTML = `<span class="badge badge-success">已添加 ${resumes.length} 份</span>`;
   }
 }
 
@@ -80,16 +77,13 @@ async function updateDomainStatus() {
   ]);
   
   if (enableAllDomains) {
-    domainStatus.textContent = '所有网站';
-    domainStatus.className = 'value success';
+    domainStatus.innerHTML = '<span class="badge badge-success">所有网站</span>';
   } else {
     const count = enabledDomains.length;
     if (count === 0) {
-      domainStatus.textContent = '未设置';
-      domainStatus.className = 'value error';
+      domainStatus.innerHTML = '<span class="badge badge-danger">未设置</span>';
     } else {
-      domainStatus.textContent = `${count} 个网站`;
-      domainStatus.className = 'value success';
+      domainStatus.innerHTML = `<span class="badge badge-success">${count} 个网站</span>`;
     }
   }
 }
