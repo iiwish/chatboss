@@ -6,7 +6,25 @@ const defaultConfig = {
   apiEndpoint: '',
   apiKey: '',
   modelCode: '',
-  promptTemplate: '我想要应聘以下职位：\n{{JD}}\n\n我的简历信息如下：\n{{RESUME}}\n\n请根据职位描述和我的简历，生成一个合适的招呼语。要求：\n1. 有针对性地提到JD中的关键要求\n2. 突出我简历中相关的经验\n3. 语气要真诚友好\n4. 控制在150字以内',
+  promptTemplate: `你是一位专业的求职顾问，擅长帮助求职者撰写个性化的招呼语。
+
+【招聘信息】:
+{{JD}}
+
+【我的简历信息】:
+{{RESUME}}
+
+请根据上述招聘信息和我的简历，帮我生成一封专业、个性化的招呼语。要求:
+
+1. 开头简短自我介绍，点明应聘意向
+2. 中间部分针对JD中的关键技能要求，从我的简历中提取最匹配的1-2个经验亮点进行展示
+3. 结尾表达对职位的热情和期待进一步交流的意愿
+4. 保持语气真诚友好、专业得体，避免过度吹嘘
+5. 总字数控制在100-150字之间
+6. 确保内容高度针对性，不要泛泛而谈
+7. 如果JD和简历匹配度不高，找出可迁移的能力或经验进行强调
+
+请直接给出招呼语文本，不要包含解释。`,
   resumes: [],
   enabledDomains: [],
   enableAllDomains: true
@@ -147,10 +165,16 @@ function handleGreetingGeneration(info, tab) {
         const controller = new AbortController();
         abortControllers.set(tab.id, controller);
         
-        // 构建prompt
+        // 构建prompt，包含所有简历
+        const allResumes = resumes.map(resume => 
+          `【${resume.title}】\n${resume.content}`).join('\n\n');
+        
+        // 处理两种可能的占位符格式
         const actualPrompt = (promptTemplate || defaultConfig.promptTemplate)
           .replace(/{{JD}}/g, info.selectionText)
-          .replace(/{{RESUME}}/g, resumes[0].content);
+          .replace(/{{RESUME}}/g, allResumes)
+          .replace(/{jobDescription}/g, info.selectionText)
+          .replace(/{resume}/g, allResumes);
 
         // 调用API，使用AbortController的signal
         const response = await fetch(apiEndpoint, {
