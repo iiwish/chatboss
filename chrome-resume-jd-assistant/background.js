@@ -36,10 +36,11 @@ async function updateContextMenu(url) {
 
   // 获取域名和配置
   const domain = new URL(url).hostname;
-  const { enabledDomains = [], enableAllDomains = true } = await chrome.storage.sync.get([
-    'enabledDomains',
-    'enableAllDomains'
-  ]);
+  const data = await chrome.storage.sync.get(['enabledDomains', 'enableAllDomains']);
+  
+  // 确保enabledDomains为数组，enableAllDomains默认为true
+  const enabledDomains = Array.isArray(data.enabledDomains) ? data.enabledDomains : [];
+  const enableAllDomains = data.enableAllDomains !== undefined ? data.enableAllDomains : true;
 
   // 检查域名是否匹配配置的域名（包括子域名）
   const isDomainAllowed = enableAllDomains || enabledDomains.some(configuredDomain => {
@@ -170,8 +171,12 @@ function handleGreetingGeneration(info, tab) {
     const url = new URL(tab.url);
     const domain = url.hostname;
     
+    // 确保enabledDomains为数组，enableAllDomains默认为true
+    const enabledDomains = Array.isArray(config.enabledDomains) ? config.enabledDomains : [];
+    const enableAllDomains = config.enableAllDomains !== undefined ? config.enableAllDomains : true;
+    
     // 检查域名是否匹配配置的域名（包括子域名）
-    const isDomainAllowed = config.enableAllDomains || config.enabledDomains.some(configuredDomain => {
+    const isDomainAllowed = enableAllDomains || enabledDomains.some(configuredDomain => {
       return domain === configuredDomain || 
              domain.endsWith('.' + configuredDomain);
     });
