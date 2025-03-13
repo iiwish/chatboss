@@ -217,9 +217,7 @@ function handleGreetingGeneration(info, tab) {
         // 处理两种可能的占位符格式
         const actualPrompt = (currentConfig.promptTemplate || defaultConfig.promptTemplate)
           .replace(/{{JD}}/g, info.selectionText)
-          .replace(/{{RESUME}}/g, allResumes)
-          .replace(/{jobDescription}/g, info.selectionText)
-          .replace(/{resume}/g, allResumes);
+          .replace(/{{RESUME}}/g, allResumes);
 
         // 处理API endpoint，确保正确拼接chat/completions
         let apiUrl = currentConfig.apiEndpoint;
