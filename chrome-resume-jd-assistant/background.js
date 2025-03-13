@@ -221,8 +221,15 @@ function handleGreetingGeneration(info, tab) {
           .replace(/{jobDescription}/g, info.selectionText)
           .replace(/{resume}/g, allResumes);
 
+        // 处理API endpoint，确保正确拼接chat/completions
+        let apiUrl = currentConfig.apiEndpoint;
+        if (!apiUrl.endsWith('/')) {
+          apiUrl += '/';
+        }
+        apiUrl += 'chat/completions';
+
         // 调用API，使用AbortController的signal
-        const response = await fetch(currentConfig.apiEndpoint, {
+        const response = await fetch(apiUrl, {
           signal: controller.signal,
           method: 'POST',
           headers: {
