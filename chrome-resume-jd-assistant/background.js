@@ -53,7 +53,7 @@ async function updateContextMenu(url) {
   if (isDomainAllowed) {
     chrome.contextMenus.create({
       id: 'generateGreeting',
-      title: 'AI生成招呼语',
+      title: 'ChatBoss: 生成招呼语',
       contexts: ['selection']
     });
   }
