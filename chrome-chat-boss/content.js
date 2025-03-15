@@ -255,7 +255,7 @@ function createModal(status = 'connecting') {
   
   const title = document.createElement('h3');
   title.className = 'ai-greeting-modal-title';
-  title.textContent = 'AI招呼语生成';
+  title.textContent = 'ChatBoss-AI招呼语生成';
   
   titleContainer.appendChild(logo);
   titleContainer.appendChild(title);

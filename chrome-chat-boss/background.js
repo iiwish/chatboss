@@ -353,7 +353,7 @@ function handleGreetingGeneration(info, tab) {
     } else {
       sendMessageToTab(tab.id, {
         type: 'showError',
-        message: '当前网站未启用AI招呼语生成功能'
+        message: '当前网站未启用ChatBoss-AI招呼语生成功能'
       });
     }
   });
