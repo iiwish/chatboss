@@ -95,7 +95,7 @@ ChatBoss需要使用大语言模型API来生成招呼语。您可以使用DeepSe
 默认情况下，ChatBoss在所有网站上启用。您可以选择仅在特定招聘网站上启用此功能：
 
 1. 在"网站设置"部分，取消勾选"在所有网站上启用"
-2. 在输入框中添加您常用的招聘网站域名（如`www.linkedin.com`）
+2. 在输入框中添加您常用的招聘网站域名（如`zhipin.com`）
 3. 点击"添加"按钮
 
 
@@ -199,12 +199,18 @@ ChatBoss高度重视用户隐私：
 
 ---
 
+## 📄 开源协议
+
+本项目采用 [MIT 许可证](https://github.com/iiwish/chatboss/blob/main/LICENSE) 进行开源。您可以自由地使用、修改和分发本项目，但需要保留原始版权声明和许可证文本。
+
+---
+
 ## 📱 联系与支持
 
 如遇到任何问题或有功能建议，请通过以下方式联系我们：
 
-- 提交Issues：[GitHub Issues链接](#)
-- 电子邮件：[v123vip@163.com](#)
+- 提交Issues：[GitHub Issues链接](https://github.com/iiwish/chatboss/issues)
+- 电子邮件：[v123vip@163.com]()
 
 ---
 
