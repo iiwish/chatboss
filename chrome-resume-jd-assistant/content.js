@@ -333,7 +333,6 @@ function showResult(result, isFinalResult = false) {
   if (overlay) {
     modal = overlay.querySelector('.ai-greeting-modal');
     statusIndicator = overlay.querySelector('.ai-greeting-modal-status');
-    content = overlay.querySelector('.ai-greeting-modal-content');
     
     // 如果是第一次收到结果，状态从思考中变为回答中
     if (statusIndicator.textContent === '思考中') {
@@ -341,18 +340,25 @@ function showResult(result, isFinalResult = false) {
       statusIndicator.textContent = '回答中';
     }
     
-    // 如果内容区域是加载动画，改为文本内容
-    if (content.className === 'ai-greeting-modal-loading') {
-      content.innerHTML = '';
+    // 检查是否是加载状态
+    const loadingContent = overlay.querySelector('.ai-greeting-modal-loading');
+    if (loadingContent) {
+      // 创建新的内容区域替换加载区域
+      content = document.createElement('div');
       content.className = 'ai-greeting-modal-content';
+      content.textContent = result;
+      
+      // 替换加载区域
+      loadingContent.parentNode.replaceChild(content, loadingContent);
       
       // 移除提示信息
       const tip = overlay.querySelector('.ai-greeting-modal-tip');
       if (tip) tip.remove();
+    } else {
+      // 如果不是加载状态，获取正常的内容区域
+      content = overlay.querySelector('.ai-greeting-modal-content');
+      content.textContent = result;
     }
-    
-    // 更新内容
-    content.textContent = result;
   } else {
     // 如果没有弹窗，创建一个新的
     const modalObj = createModal('answering');
@@ -363,45 +369,49 @@ function showResult(result, isFinalResult = false) {
     content.textContent = result;
   }
   
-  // 只有在最终结果时才添加复制按钮并更新状态为完成
-  if (isFinalResult && !overlay.querySelector('.ai-greeting-modal-actions')) {
-    const actions = document.createElement('div');
-    actions.className = 'ai-greeting-modal-actions';
-
-    const copyButton = document.createElement('button');
-    copyButton.className = 'ai-greeting-modal-button ai-greeting-modal-copy';
-    copyButton.textContent = '复制招呼语';
-    copyButton.onclick = () => {
-      navigator.clipboard.writeText(result).then(() => {
-        copyButton.textContent = '✓ 已复制';
-        setTimeout(() => {
-          copyButton.textContent = '复制招呼语';
-        }, 2000);
-      });
-    };
-    
-    const cancelButton = document.createElement('button');
-    cancelButton.className = 'ai-greeting-modal-button ai-greeting-modal-cancel';
-    cancelButton.textContent = '关闭';
-    cancelButton.onclick = () => {
-      overlay.remove();
-    };
-
-    actions.appendChild(cancelButton);
-    actions.appendChild(copyButton);
-    modal.appendChild(actions);
-    
+  // 如果是最终结果
+  if (isFinalResult) {
     // 更新状态为完成
     statusIndicator.className = 'ai-greeting-modal-status completed';
     statusIndicator.textContent = '完成';
     
-    // 添加使用提示
-    const tip = document.createElement('div');
-    tip.className = 'ai-greeting-modal-tip';
-    tip.textContent = '提示：您可以在设置中添加多份简历，系统会自动选择最匹配的内容生成招呼语。';
-    modal.appendChild(tip);
+    // 只有在没有添加过操作按钮时才添加
+    if (!overlay.querySelector('.ai-greeting-modal-actions')) {
+      const actions = document.createElement('div');
+      actions.className = 'ai-greeting-modal-actions';
+
+      const copyButton = document.createElement('button');
+      copyButton.className = 'ai-greeting-modal-button ai-greeting-modal-copy';
+      copyButton.textContent = '复制招呼语';
+      copyButton.onclick = () => {
+        navigator.clipboard.writeText(result).then(() => {
+          copyButton.textContent = '✓ 已复制';
+          setTimeout(() => {
+            copyButton.textContent = '复制招呼语';
+          }, 2000);
+        });
+      };
+      
+      const cancelButton = document.createElement('button');
+      cancelButton.className = 'ai-greeting-modal-button ai-greeting-modal-cancel';
+      cancelButton.textContent = '关闭';
+      cancelButton.onclick = () => {
+        overlay.remove();
+      };
+
+      actions.appendChild(cancelButton);
+      actions.appendChild(copyButton);
+      modal.appendChild(actions);
+      
+      // 添加使用提示
+      const tip = document.createElement('div');
+      tip.className = 'ai-greeting-modal-tip';
+      tip.textContent = '提示：您可以在设置中添加多份简历，系统会自动选择最匹配的内容生成招呼语。';
+      modal.appendChild(tip);
+    }
   }
 }
+
 
 // 显示错误信息
 function showError(message) {
@@ -438,8 +448,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
-  // 移除所有现有的弹窗
-  document.querySelectorAll('.ai-greeting-modal-overlay').forEach(el => el.remove());
+  // 只有在开始新生成或显示错误时才移除现有弹窗
+  // 对于流式更新的结果，不应该移除弹窗
+  if (message.type === 'startGeneration' || message.type === 'showError') {
+    document.querySelectorAll('.ai-greeting-modal-overlay').forEach(el => el.remove());
+  }
 
   switch (message.type) {
     case 'startGeneration':
@@ -448,6 +461,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case 'showResult':
       // 检查是否是最终结果
       const isFinalResult = message.isFinalResult === true;
+      // 确保在调用showResult前，消息已经被正确处理
+      console.log('收到结果更新，是否为最终结果:', isFinalResult);
       showResult(message.result, isFinalResult);
       break;
     case 'showError':
