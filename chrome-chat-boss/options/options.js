@@ -444,10 +444,10 @@ async function migrateData() {
     // 如果有旧的API配置，迁移到新格式
     if (apiEndpoint && apiKey) {
       const newApiConfigs = [{
-        name: 'OpenAI配置',  // 默认名称
+        name: 'DepSeek配置',  // 默认名称
         apiEndpoint,
         apiKey,
-        modelCode: modelCode || 'gpt-3.5-turbo',
+        modelCode: modelCode || 'deepseek-reasoner',
         promptTemplate: promptTemplate || defaultTemplate
       }];
 

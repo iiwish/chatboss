@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "ChatBoss-AI招呼语生成器",
-  "version": "1.0",
+  "name": "ChatBoss - AI招呼语生成器",
+  "version": "1.0.0",
   "description": "根据招聘JD和您的简历自动生成个性化招呼语",
   "permissions": [
     "storage",

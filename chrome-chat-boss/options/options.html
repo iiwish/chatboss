@@ -206,7 +206,7 @@
     <div class="steps">
       <div class="step">
         <div class="step-title">配置API</div>
-        <div class="step-content">添加您的API密钥和接口地址，支持OpenAI等多种API服务</div>
+        <div class="step-content">添加您的API密钥和接口地址，支持DeepSeek等多种类似OpenAI的API服务</div>
       </div>
       <div class="step">
         <div class="step-title">添加简历</div>
@@ -225,7 +225,7 @@
       <h2>API配置</h2>
     </div>
     <div class="section-description">
-      配置您的API接口信息，支持OpenAI、Azure OpenAI等多种服务。您可以添加多个配置并随时切换。
+      配置您的API接口信息，支持DeepSeek等多种类似OpenAI的API服务。您可以添加多个配置并随时切换。
     </div>
     
     <div id="apiConfigList" class="api-config-list">
@@ -235,12 +235,12 @@
     <div class="api-config-form" style="display: none;">
       <div class="form-group">
         <label class="form-label" for="configName">配置名称</label>
-        <input type="text" id="configName" class="form-control" placeholder="例如：OpenAI GPT-3.5">
+        <input type="text" id="configName" class="form-control" placeholder="例如：DeepSeek R1">
         <small class="form-text">为您的API配置起一个易于识别的名称</small>
       </div>
       <div class="form-group">
         <label class="form-label" for="apiEndpoint">API接口地址</label>
-        <input type="url" id="apiEndpoint" class="form-control" placeholder="例如：https://api.openai.com/v1/chat/completions">
+        <input type="url" id="apiEndpoint" class="form-control" placeholder="例如：https://api.deepseek.com">
         <small class="form-text">输入完整的API接口地址，不包含chat/completions部分</small>
       </div>
       <div class="form-group">
@@ -250,7 +250,7 @@
       </div>
       <div class="form-group">
         <label class="form-label" for="modelCode">模型代码</label>
-        <input type="text" id="modelCode" class="form-control" placeholder="例如：gpt-3.5-turbo">
+        <input type="text" id="modelCode" class="form-control" placeholder="例如：deepseek-reasoner">
         <small class="form-text">指定要使用的AI模型代码</small>
       </div>
       <div class="form-group">
@@ -271,7 +271,7 @@
     <div id="apiStatus" class="alert" style="display: none;"></div>
     
     <div class="help-tip">
-      <strong>提示：</strong> 您需要有一个有效的API密钥才能使用此功能。如果您没有API密钥，可以在OpenAI官网申请，或使用其他兼容的API服务。
+      <strong>提示：</strong> 您需要有一个有效的API密钥才能使用此功能。如果您没有API密钥，可以在DeepSeek官网申请，或使用其他兼容的API服务。
     </div>
   </div>
 
@@ -289,6 +289,14 @@
       <input type="text" id="resumeTitle" class="form-control" placeholder="例如：产品经理简历">
       <small class="form-text">为您的简历起一个描述性的标题，方便区分不同版本</small>
     </div>
+    
+    <div class="alert alert-warning d-flex align-items-center mt-2 mb-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2" viewBox="0 0 16 16">
+        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+      </svg>
+      <div><strong>隐私警告：</strong>请不要在简历中添加电话号码、真实姓名等个人隐私数据！</div>
+    </div>
+    
     <div class="form-group">
       <label class="form-label" for="resumeContent">简历内容</label>
       <textarea id="resumeContent" class="form-control" placeholder="粘贴您的简历内容"></textarea>
