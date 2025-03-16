@@ -322,36 +322,27 @@
       <h2>网站设置</h2>
     </div>
     <div class="section-description">
-      设置在哪些招聘网站上启用ChatBoss-AI招呼语生成功能。您可以选择在所有网站上启用，或仅在特定网站上启用。
+      ChatBoss仅在特定招聘网站上启用，保障您的隐私和安全。
     </div>
     
-    <div class="form-group">
-      <label class="d-flex align-items-center">
-        <input type="checkbox" id="enableAllDomains"> 
-        <span class="ml-2">在所有网站上启用</span>
-      </label>
-      <small class="form-text">选中此项将在所有网站上启用右键菜单功能</small>
+    <div class="alert alert-info">
+      <strong>已支持的招聘网站：</strong>
+      <ul style="margin-top: 10px; margin-bottom: 5px;">
+        <li>LinkedIn (linkedin.com)</li>
+        <li>BOSS直聘 (zhipin.com)</li>
+        <li>智联招聘 (zhaopin.com)</li>
+        <li>前程无忧 (51job.com)</li>
+        <li>拉勾网 (lagou.com)</li>
+        <li>猎聘网 (liepin.com)</li>
+        <li>Indeed (indeed.com)</li>
+        <li>Glassdoor (glassdoor.com)</li>
+        <li>Jobrapido (jobrapido.com)</li>
+      </ul>
+      <p style="margin-top: 10px;">根据Chrome扩展政策，此列表无法由用户自行扩展。如需支持更多网站，请在GitHub提交issue。</p>
     </div>
-    
-    <div id="domainSettings">
-      <div class="form-group">
-        <label class="form-label" for="domain">添加特定网站域名</label>
-        <div class="domain-item">
-          <input type="text" id="domain" class="form-control domain-input" placeholder="例如：zhipin.com">
-          <button id="addDomain" class="btn btn-primary">添加</button>
-        </div>
-        <small class="form-text">输入要启用的网站域名，不需要包含http://或https://</small>
-      </div>
-      
-      <div id="domainList" class="domain-list">
-        <!-- 域名列表将通过JavaScript动态生成 -->
-      </div>
-    </div>
-    
-    <div id="domainStatus" class="alert" style="display: none;"></div>
     
     <div class="help-tip">
-      <strong>提示：</strong> 为了保护您的隐私和提高性能，建议只在您常用的招聘网站上启用此功能。常见的招聘网站包括LinkedIn、Indeed、智联招聘、BOSS直聘等。
+      <strong>说明：</strong> 为了通过Chrome应用商店的审核并保障用户隐私，ChatBoss仅在特定招聘网站上启用。如需支持更多网站，请在<a href="https://github.com/iiwish/chatboss/issues" target="_blank">GitHub Issues</a>提交请求。
     </div>
   </div>
 

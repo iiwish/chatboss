@@ -325,98 +325,32 @@ document.getElementById('addResume').addEventListener('click', async () => {
   }
 });
 
-// 域名设置管理
-function createDomainElement(domain, index) {
-  const div = document.createElement('div');
-  div.className = 'domain-item';
-  
-  const text = document.createElement('span');
-  text.textContent = domain;
-  text.style.flexGrow = '1';
-  
-  const deleteButton = document.createElement('button');
-  deleteButton.className = 'btn btn-danger btn-sm';
-  deleteButton.textContent = '删除';
-  deleteButton.onclick = async () => {
-    try {
-      const { enabledDomains } = await chrome.storage.sync.get(['enabledDomains']);
-      enabledDomains.splice(index, 1);
-      await chrome.storage.sync.set({ enabledDomains });
-      renderDomains();
-      showStatus('domainStatus', '域名删除成功');
-    } catch (error) {
-      showStatus('domainStatus', '删除失败：' + error.message, true);
-    }
-  };
-  
-  div.appendChild(text);
-  div.appendChild(deleteButton);
-  return div;
-}
-
-async function renderDomains() {
+// 域名设置管理 - 禁用相关功能
+function renderDomains() {
   const domainList = document.getElementById('domainList');
-  const { enabledDomains = [], enableAllDomains = true } = await chrome.storage.sync.get(['enabledDomains', 'enableAllDomains']);
   
   domainList.innerHTML = '';
   
-  if (enableAllDomains) {
-    // 如果启用了所有域名，显示提示信息
-    const allEnabledMessage = document.createElement('div');
-    allEnabledMessage.className = 'help-tip';
-    allEnabledMessage.innerHTML = '当前已启用所有网站。如需限制特定网站，请取消勾选"在所有网站上启用"选项。';
-    domainList.appendChild(allEnabledMessage);
-    return;
-  }
+  const noticeElement = document.createElement('div');
+  noticeElement.className = 'help-tip';
+  noticeElement.innerHTML = '此功能已被禁用。ChatBoss仅在特定招聘网站上启用，无法自定义添加网站。';
   
-  if (enabledDomains.length === 0) {
-    const emptyMessage = document.createElement('div');
-    emptyMessage.className = 'help-tip';
-    emptyMessage.innerHTML = '您还没有添加任何域名。添加至少一个域名才能在特定网站上使用此功能。';
-    domainList.appendChild(emptyMessage);
-    return;
-  }
+  domainList.appendChild(noticeElement);
   
-  enabledDomains.forEach((domain, index) => {
-    domainList.appendChild(createDomainElement(domain, index));
-  });
+  // 禁用相关控件
+  document.getElementById('enableAllDomains').disabled = true;
+  document.getElementById('domain').disabled = true;
+  document.getElementById('addDomain').disabled = true;
 }
 
-document.getElementById('enableAllDomains').addEventListener('change', async (e) => {
-  const enabled = e.target.checked;
-  try {
-    await chrome.storage.sync.set({ enableAllDomains: enabled });
-    document.getElementById('domainSettings').style.display = enabled ? 'none' : 'block';
-    showStatus('domainStatus', `已${enabled ? '启用所有网站' : '切换为特定网站'}模式`);
-  } catch (error) {
-    showStatus('domainStatus', '设置失败：' + error.message, true);
-  }
+// 禁用域名相关事件监听器
+document.getElementById('enableAllDomains').addEventListener('change', () => {
+  // 已禁用，不执行任何操作
 });
 
-document.getElementById('addDomain').addEventListener('click', async () => {
-  const domain = document.getElementById('domain').value.trim();
-  
-  if (!domain) {
-    showStatus('domainStatus', '请输入域名', true);
-    return;
-  }
-
-  try {
-    const { enabledDomains = [] } = await chrome.storage.sync.get(['enabledDomains']);
-    if (enabledDomains.includes(domain)) {
-      showStatus('domainStatus', '该域名已存在', true);
-      return;
-    }
-    
-    enabledDomains.push(domain);
-    await chrome.storage.sync.set({ enabledDomains });
-    
-    document.getElementById('domain').value = '';
-    renderDomains();
-    showStatus('domainStatus', '域名添加成功');
-  } catch (error) {
-    showStatus('domainStatus', '添加失败：' + error.message, true);
-  }
+document.getElementById('addDomain').addEventListener('click', () => {
+  // 已禁用，不执行任何操作
+  showStatus('domainStatus', '此功能已被禁用。ChatBoss仅在特定招聘网站上启用。', true);
 });
 
 // 数据迁移：从旧格式迁移到新格式
@@ -479,24 +413,27 @@ async function initializePage() {
     
     const { 
       apiConfigs = [],
-      currentApiConfigIndex = 0,
-      enableAllDomains = true 
+      currentApiConfigIndex = 0
     } = await chrome.storage.sync.get([
       'apiConfigs',
-      'currentApiConfigIndex',
-      'enableAllDomains'
+      'currentApiConfigIndex'
     ]);
 
     // 渲染API配置列表
     await renderApiConfigs();
-
-    // 设置域名配置
-    document.getElementById('enableAllDomains').checked = enableAllDomains;
-    document.getElementById('domainSettings').style.display = enableAllDomains ? 'none' : 'block';
     
-    // 渲染其他内容
+    // 渲染简历
     await renderResumes();
-    await renderDomains();
+    
+    // 渲染域名设置（已禁用）
+    renderDomains();
+    
+    // 禁用域名设置相关控件
+    document.getElementById('enableAllDomains').checked = false;
+    document.getElementById('enableAllDomains').disabled = true;
+    document.getElementById('domain').disabled = true;
+    document.getElementById('addDomain').disabled = true;
+    
   } catch (error) {
     console.error('初始化失败：', error);
   }

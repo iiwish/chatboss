@@ -90,14 +90,21 @@ ChatBoss需要使用大语言模型API来生成招呼语。您可以使用DeepSe
     <img src="docs\img\config2.png" alt="添加简历" width="780">
 </div>
 
-### 3. 网站设置（可选）
+### 3. 网站设置（仅支持特定网站）
 
-默认情况下，ChatBoss在所有网站上启用。您可以选择仅在特定招聘网站上启用此功能：
+为了保障用户隐私和符合Chrome扩展商店政策，ChatBoss仅在以下招聘网站上启用：
 
-1. 在"网站设置"部分，取消勾选"在所有网站上启用"
-2. 在输入框中添加您常用的招聘网站域名（如`zhipin.com`）
-3. 点击"添加"按钮
+- LinkedIn (linkedin.com)
+- BOSS直聘 (zhipin.com)
+- 智联招聘 (zhaopin.com)
+- 前程无忧 (51job.com)
+- 拉勾网 (lagou.com)
+- 猎聘网 (liepin.com)
+- Indeed (indeed.com)
+- Glassdoor (glassdoor.com)
+- Jobrapido (jobrapido.com)
 
+> **注意**：根据Chrome扩展政策，扩展只能在manifest中预定义的网站上运行。如需支持更多招聘网站，请在GitHub提交issue。
 
 <div align="center">
     <img src="docs\img\config3.png" alt="网站设置" width="780">
@@ -170,7 +177,7 @@ ChatBoss高度重视用户隐私：
 
 确保您已：
 1. 选中了页面上的文本（职位描述）
-2. 当前网站在允许的域名列表中（如果您限制了特定网站）
+2. 当前网站是支持的招聘网站（如LinkedIn、BOSS直聘等）
 3. 扩展已正确安装并启用
 
 ### 生成的招呼语质量不高怎么办？
