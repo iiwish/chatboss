@@ -210,7 +210,7 @@ ChatBoss高度重视用户隐私：
 如遇到任何问题或有功能建议，请通过以下方式联系我们：
 
 - 提交Issues：[GitHub Issues链接](https://github.com/iiwish/chatboss/issues)
-- 电子邮件：[v123vip@163.com]()
+- 电子邮件：[v123vip@163.com](mailto:v123vip@163.com)
 
 ---
 
