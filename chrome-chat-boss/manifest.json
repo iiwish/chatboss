@@ -10,32 +10,14 @@
     "scripting"
   ],
   "host_permissions": [
-    "*://*.linkedin.com/*",
-    "*://*.zhipin.com/*",
-    "*://*.zhaopin.com/*",
-    "*://*.51job.com/*",
-    "*://*.lagou.com/*",
-    "*://*.liepin.com/*",
-    "*://*.indeed.com/*",
-    "*://*.glassdoor.com/*",
-    "*://*.jobrapido.com/*"
+    "<all_urls>"
   ],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": [
-        "*://*.linkedin.com/*",
-        "*://*.zhipin.com/*",
-        "*://*.zhaopin.com/*",
-        "*://*.51job.com/*",
-        "*://*.lagou.com/*",
-        "*://*.liepin.com/*",
-        "*://*.indeed.com/*",
-        "*://*.glassdoor.com/*",
-        "*://*.jobrapido.com/*"
-      ],
+      "matches": ["<all_urls>"],
       "js": ["content.js"]
     }
   ],

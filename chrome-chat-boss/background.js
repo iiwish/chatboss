@@ -5,22 +5,10 @@ const abortControllers = new Map();
 const defaultConfig = {
   apiConfigs: [],
   currentApiConfigIndex: 0,
-  resumes: []
-  // 移除enabledDomains和enableAllDomains
+  resumes: [],
+  enabledDomains: [],
+  enableAllDomains: true
 };
-
-// 支持的招聘网站域名列表
-const supportedDomains = [
-  'linkedin.com',
-  'zhipin.com',
-  'zhaopin.com',
-  '51job.com',
-  'lagou.com',
-  'liepin.com',
-  'indeed.com',
-  'glassdoor.com',
-  'jobrapido.com'
-];
 
 // 获取当前使用的API配置
 async function getCurrentApiConfig() {
@@ -46,15 +34,22 @@ async function updateContextMenu(url) {
     return;
   }
 
-  // 获取域名
+  // 获取域名和配置
   const domain = new URL(url).hostname;
+  const data = await chrome.storage.sync.get(['enabledDomains', 'enableAllDomains']);
   
-  // 检查域名是否为支持的招聘网站
-  const isDomainAllowed = supportedDomains.some(supportedDomain => 
-    domain === supportedDomain || domain.endsWith('.' + supportedDomain)
-  );
+  // 确保enabledDomains为数组，enableAllDomains默认为true
+  const enabledDomains = Array.isArray(data.enabledDomains) ? data.enabledDomains : [];
+  const enableAllDomains = data.enableAllDomains !== undefined ? data.enableAllDomains : true;
 
-  // 只在支持的招聘网站上创建右键菜单
+  // 检查域名是否匹配配置的域名（包括子域名）
+  const isDomainAllowed = enableAllDomains || enabledDomains.some(configuredDomain => {
+    // 如果当前域名以配置的域名结尾，并且前面是域名分隔符（.）或者是开头
+    return domain === configuredDomain || 
+           domain.endsWith('.' + configuredDomain);
+  });
+
+  // 只在允许的域名上创建右键菜单
   if (isDomainAllowed) {
     chrome.contextMenus.create({
       id: 'generateGreeting',
@@ -171,19 +166,24 @@ function cancelRequest(tabId) {
 function handleGreetingGeneration(info, tab) {
   // 如果已有请求正在进行，先取消它
   cancelRequest(tab.id);
-  
-  const url = new URL(tab.url);
-  const domain = url.hostname;
-  
-  // 检查域名是否为支持的招聘网站
-  const isDomainAllowed = supportedDomains.some(supportedDomain => 
-    domain === supportedDomain || domain.endsWith('.' + supportedDomain)
-  );
-  
-  if (isDomainAllowed) {
-    // 获取当前API配置和简历
-    chrome.storage.sync.get(['resumes'], async (result) => {
-      const resumes = result.resumes || [];
+  // 检查是否在允许的域名中
+  chrome.storage.sync.get(['enabledDomains', 'enableAllDomains'], async (config) => {
+    const url = new URL(tab.url);
+    const domain = url.hostname;
+    
+    // 确保enabledDomains为数组，enableAllDomains默认为true
+    const enabledDomains = Array.isArray(config.enabledDomains) ? config.enabledDomains : [];
+    const enableAllDomains = config.enableAllDomains !== undefined ? config.enableAllDomains : true;
+    
+    // 检查域名是否匹配配置的域名（包括子域名）
+    const isDomainAllowed = enableAllDomains || enabledDomains.some(configuredDomain => {
+      return domain === configuredDomain || 
+             domain.endsWith('.' + configuredDomain);
+    });
+    
+    if (isDomainAllowed) {
+      // 获取当前API配置和简历
+      const { resumes } = await chrome.storage.sync.get(['resumes']);
       let currentConfig;
       
       try {
@@ -203,7 +203,7 @@ function handleGreetingGeneration(info, tab) {
         });
         return;
       }
-      
+
       // 发送消息到content script开始生成
       sendMessageToTab(tab.id, {
         type: 'startGeneration',
@@ -350,13 +350,13 @@ function handleGreetingGeneration(info, tab) {
           }
         }
       }
-    });
-  } else {
-    sendMessageToTab(tab.id, {
-      type: 'showError',
-      message: '当前网站不在支持的招聘网站列表中。仅支持LinkedIn、BOSS直聘、智联招聘等常见招聘网站。'
-    });
-  }
+    } else {
+      sendMessageToTab(tab.id, {
+        type: 'showError',
+        message: '当前网站未启用ChatBoss-AI招呼语生成功能'
+      });
+    }
+  });
 }
 
 // 安全地发送消息到标签页
